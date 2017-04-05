@@ -1,0 +1,82 @@
+int E1 = 4;  // marche arret (0/1)
+int M1 = 5; //  controle vitesse et sens avec pwm
+int Temp_s=17;
+int a = 500; //temps de fonctionnement du moteur pour augementer ou diminuer la tmepérature de 1°C
+ void setup() // executée une seule fois
+{
+    pinMode(E1, OUTPUT); 
+    pinMode(M1, OUTPUT);      
+    Serial.begin(9600); // initialisation communication série
+     
+}
+
+ void loop() // executée en boucle
+
+ {
+
+
+    int Temp = analogRead(A1); // Mesure la tension sur la broche A1
+
+   int TEMP_m = Temp * (5.0 / 1023.0 * 100.0);// Transforme la mesure (nombre entier) en température via un produit en croix
+
+   Serial.println(TEMP_m);// Envoi la mesure au PC pour affichage et attends 250ms
+   delay(250);
+
+
+                    if ( TEMP_m == Temp_s )
+                      { 
+                        analogWrite(M1,0); // arret moteur 
+                        Serial.println("température correct, chauffage inutile");
+                        delay(1000);
+                      }
+
+                      
+          
+        
+                       while ( Temp_s > TEMP_m ) // si on doit chauffer 
+                           {
+
+                               
+                               Temp_s = Temp_s - TEMP_m; // calcul de l'écart 
+                                Serial.println("réglage de la température");
+                                delay(1000);
+                                digitalWrite(E1,HIGH);
+                                analogWrite (M1,255); 
+                                delay(a*Temp_s);
+                                if ( Temp_s = TEMP_m)
+                                {
+                                analogWrite(M1,0); 
+                                Serial.println("température correct maintenant");
+                                delay(1000);   
+                                break;
+                                }                                                
+            
+                             }
+
+                         
+    
+                             while ( TEMP_m > Temp_s ) //arret du chauffage 
+                                    {  
+
+                                          TEMP_m = TEMP_m - Temp_s;
+                                          Serial.println("fermeture de vanne pour régulation");
+                                          delay(100);
+                                          digitalWrite(E1,LOW);
+                                          analogWrite (M1,255);                                          
+                                          delay(a*TEMP_m);
+
+                                          if ( TEMP_m = Temp_s )
+                                          {
+                                            analogWrite(M1,0);
+                                            Serial.println("température correct maintenant");
+                                            delay(1000); 
+                                            break;
+                                          }
+                                           
+         
+                                      }
+
+
+                      
+    
+     }
